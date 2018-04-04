@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/go-kit/kit/log"
-	"github.com/spiffcs/borkbot"
+	"github.com/sparklycb/borkbot"
 )
 
 func main() {

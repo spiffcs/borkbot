@@ -68,7 +68,7 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
-// SlackForm contains all of the information that comes in from a slack post request
+// SlackForm contains all of the information that comes in from a slack POST request
 // Requests from slack come as application/x-www-form-urlencoded so we need a way to
 // decode these values when receving the request
 type SlackForm struct {

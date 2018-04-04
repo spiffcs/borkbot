@@ -1,4 +1,4 @@
-# Project Title
+# BorkBot
 
 Borkbot - Goodboi for slack
 
@@ -11,40 +11,54 @@ These instructions will get you a copy of the project up and running on your loc
 What things you need to install the software and how to install them
 
 ``` bash
-golang
-dep
+docker
 ```
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
+```bash
+git clone git@github.com:sparklycb/borkbot.git
 
-* clone down borkbot
+docker build -t borkbot .
 
-``` bash
-git clone git@github.com:spiffcs/borkbot.git
+docker run --rm -it -p 9000:9000 -v $(pwd):/go/src/github.com/sparklycb/borkbot borkbot sh
+
+/go/src/github.com/sparklycb: CompileDaemon -build="go build -o borkbotd borkbot/cmd/borkd/main.go" \
+                                            -command="./borkbotd --verification_token=<SLACK_VERIRICATION_TOKEN>" \
+                                            -exclude-dir="vendor"
 ```
 
-* run dep to get all the dependencies from the root borkbot folder
+After running the above you should see:
 
-``` bash
-dep ensure
+```bash
+2018/04/03 18:09:38 Running build command!
+2018/04/03 18:09:38 Build ok.
+2018/04/03 18:09:38 Restarting the given command.
+2018/04/03 18:09:38 stdout: ts=2018-04-03T18:09:38.8166853Z transport=http address=:9000 msg=listening
 ```
 
-* make sure you can build and execute the server
+The current route available is a POST request at /borkbot/v1/bork which returns a random goodboi gif.
 
-``` bash
-go build ./cmd/borkd/
-./borkd
-```
+Please note: borkd requires a verificationToken to verify that requests are coming from slack.
 
-It should be listening on :9000
-The route available is a get request at /bork which returns a static goodboi gif
+You can test this app by setting up a slack app at: [api.slack.com](https://api.slack.com/apps/A8ZB6FMQD)
 
-Please note: borkd requires a verificationToken to verify that requests are coming from slack
-
-If you want to integrate and see how it works when configured with slack follow this guide:
+If you want to integrate with slack and see how it works when configured with your own custom app follow this guide:
 https://api.slack.com/tutorials/tunneling-with-ngrok
+
+If you don't want to take the time to setup the above slack integration you can test the server with [Postman](https://www.getpostman.com/)
+Make sure your request is formatted as a POST request with the parameters listed in transport.go:74 under SlackForm
+The parameters should be application/x-www-form-urlencoded where TOKEN is the SLACK_VERIFICATION_TOKEN passed in at runtime
+
+## Production
+To build the production image run:
+
+```bash
+docker build -t borkbot:production -f ./production/Dockerfile .
+docker run -d -p 9000:9000 borkbot:production borkbotd --verification_token=<SLACK_VERIRICATION_TOKEN>
+```
+
+The production binary can be configured with a listen flag for operator needs. Make sure your -p flag matches the listen flag specified. 9000 is the current default: cmd/borkd/main.go:17
 
 ## License
 
