@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: borkbot-app-deployment-prod
+spec:
+  selector:
+    matchLabels:
+      app: borkbot-app-prod
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: borkbot-app-prod
+    spec:
+      containers:
+      - name: borkbotd
+        image: gcr.io/default-project-200117/borkd:v2
+        readinessProbe:
+          httpGet:
+            path: /borkbot/v1/health
+            port: 443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        command: ["/borkbotd"]
+        args: ["--listen", ":443", "--verification_token", "$(VERIFICATION_TOKEN)"]
+        ports:
+          - containerPort: 80
+            name: borkd-80
+          - containerPort: 443
+            name: borkd-443
+        env:
+          - name: VERIFICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: borkbot-slack
+                key: verification_token
+        volumeMounts:
+          - name: tls-certificate
+            mountPath: /secure/
+      restartPolicy: Always
+      volumes:
+      - name: tls-certificate
+        secret:
+          secretName: tls-certificate

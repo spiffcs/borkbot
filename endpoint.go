@@ -21,8 +21,8 @@ type fetchBorkRequest struct {
 }
 
 type fetchBorkResponse struct {
-	ResponseType string `json:"response_type"`
-	Text         string `json:"text"`
+	ResponseType string `json:"response_type,omitempty"`
+	Text         string `json:"text,omitempty"`
 	Err          error  `json:"error,omitempty"`
 }
 
@@ -36,6 +36,26 @@ func makeFetchBorkEndpoint(s Service) endpoint.Endpoint {
 			ResponseType: "in_channel",
 			Text:         bork,
 			Err:          err,
+		}, nil
+	}
+}
+
+type healthRequest struct{}
+
+type healthResponse struct {
+	Health string `json:"health,omitempty"`
+	Err    error  `json:"error,omitempty"`
+}
+
+func (r healthResponse) error() error { return r.Err }
+
+func makeHealthEndpoint(s Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(healthRequest)
+		health, err := s.Health(req)
+		return healthResponse{
+			Health: health,
+			Err:    err,
 		}, nil
 	}
 }

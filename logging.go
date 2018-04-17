@@ -26,3 +26,14 @@ func (s *loggingService) FetchBork(req fetchBorkRequest) (text string, err error
 	}(time.Now())
 	return s.Service.FetchBork(req)
 }
+
+func (s *loggingService) Health(req healthRequest) (ok string, err error) {
+	defer func(begin time.Time) {
+		s.logger.Log(
+			"method", "health",
+			"took", time.Since(begin),
+			"err", err,
+		)
+	}(time.Now())
+	return s.Service.Health(req)
+}

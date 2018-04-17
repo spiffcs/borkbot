@@ -11,6 +11,7 @@ import (
 type Service interface {
 	// FetchBork receives a request from the slack app and responds with a dog meme
 	FetchBork(req fetchBorkRequest) (string, error)
+	Health(req healthRequest) (string, error)
 }
 
 type service struct {
@@ -34,8 +35,8 @@ func (s *service) borkGenerator() (string, error) {
 	return borkURL, nil
 }
 
-func (s *service) borkFetcher() {
-
+func (s *service) Health(req healthRequest) (string, error) {
+	return "bork 1 reporting in", nil
 }
 
 // NewService creates a borkbot service

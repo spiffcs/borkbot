@@ -6,11 +6,11 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-playground/form"
 	"github.com/gorilla/mux"
 
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"github.com/go-playground/form"
 )
 
 func MakeHandler(s Service, logger kitlog.Logger) http.Handler {
@@ -26,7 +26,15 @@ func MakeHandler(s Service, logger kitlog.Logger) http.Handler {
 		opts...,
 	)
 
+	healthHandler := kithttp.NewServer(
+		makeHealthEndpoint(s),
+		decodeHealthRequest,
+		encodeResponse,
+		opts...,
+	)
+
 	r := mux.NewRouter()
+	r.Handle("/borkbot/v1/health", healthHandler).Methods("GET")
 	r.Handle("/borkbot/v1/bork", fetchBorkHandler).Methods("POST")
 	return r
 }
@@ -39,8 +47,11 @@ type errorer interface {
 
 // encode errors from business-logic
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	// based on the type of error we can set different status codes in this block
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	switch err {
+	switch e := err.Error(); e {
+	case "why you try to be a slack?":
+		w.WriteHeader(http.StatusUnauthorized)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -60,9 +71,14 @@ func decodeFetchBorkRequest(_ context.Context, r *http.Request) (interface{}, er
 	return br, nil
 }
 
+func decodeHealthRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return healthRequest{}, nil
+}
+
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(ctx, e.error(), w)
+		return nil
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
