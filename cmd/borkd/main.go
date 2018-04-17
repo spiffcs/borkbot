@@ -16,7 +16,7 @@ import (
 
 func main() {
 	var (
-		httpAddr          = flag.String("listen", ":8080", "HTTP listen and serve address for service")
+		httpAddr          = flag.String("listen", ":8080", "HTTPS listen and serve address for service")
 		verificationToken = flag.String("verification_token", "", "Slack token used to verify requests come from slack")
 	)
 	flag.Parse()
@@ -62,7 +62,7 @@ func main() {
 	// Server goroutine
 	go func() {
 		logger.Log("transport", "https", "address", *httpAddr, "msg", "listening")
-		errs <- srv.ListenAndServeTLS("/secure/cert.pem", "/secure/key.pem")
+		errs <- srv.ListenAndServe()
 	}()
 	// operator cancel go routines
 	go func() {

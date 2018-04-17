@@ -19,7 +19,7 @@ docker
 ```bash
 git clone git@github.com:sparklycb/borkbot.git
 
-mkdir certs
+mkdir secure
 
 # Generate a cert.pem and key.pem and place them in the cert folder. These are used for local ssl.
 # One can use generate_cert.go in crypto/tls to generate cert.pem and key.pem.
@@ -29,37 +29,43 @@ mkdir certs
 docker build -t borkbot:dev -f ./development/Dockerfile .
 
 docker run --rm -it -p 8080:8080 -v $(pwd):/go/src/github.com/sparklycb/borkbot borkbot:dev CompileDaemon -build="go build -o borkbotd borkbot/cmd/borkd/main.go" \
-                                                                                        -command="./borkbotd --verification_token=<SLACK_VERIRICATION_TOKEN>" \
+                                                                                        -command="./borkbotd" \
                                                                                         -exclude-dir="vendor"
 ```
 
+NOTE: The above CompielDaemon command does NOT pass a verification token flag to the borkbotd daemon. All requests to /borkbot/v1/bork will be honored
 After running the above you should see:
 
 ```bash
 2018/04/03 18:09:38 Running build command!
 2018/04/03 18:09:38 Build ok.
 2018/04/03 18:09:38 Restarting the given command.
-2018/04/03 18:09:38 stdout: ts=2018-04-03T18:09:38.8166853Z transport=https address=:9000 msg=listening
+2018/04/03 18:09:38 stdout: ts=2018-04-03T18:09:38.8166853Z transport=https address=:8080 msg=listening
 ```
 
 The health check endpoint is GET at /borkbot/v1/health which returns a 200 json response with a string.
-You can test this first in postmant to make sure the bot is running.
+You can test this in postman to make sure the bot is running.
+
+https://localhost:8080/borkbot/v1/health
 
 The current application route available is a POST request at /borkbot/v1/bork which returns a random goodboi gif.
 
-Please note: borkd requires a verificationToken to verify that requests are coming from slack.
+Please note: borkd requires a verificationToken to verify that requests are coming from slack in production.
 
 You can test this app by setting up a slack app at: [api.slack.com](https://api.slack.com/apps/A8ZB6FMQD)
 
 If you want to integrate with slack and see how it works when configured with your own custom app follow this guide:
 https://api.slack.com/tutorials/tunneling-with-ngrok
 
+MAKE SURE TO UPDATE YOUR DOCKER RUN CompileDaemon COMMAND TO PASS THE APPS VERIFICATION TOKEN:
+```bash
+-command="./borkbotd --verification_token=<TOKEN>"
+```
+
 If you don't want to take the time to setup the above slack integration you can test the server with [Postman](https://www.getpostman.com/)
 
 Make sure your request is formatted as a POST request with the parameters listed in transport.go:74 under SlackForm
-The parameters should be application/x-www-form-urlencoded where TOKEN is the SLACK_VERIFICATION_TOKEN passed in at runtime
-
-If no verification_token is passed then a POST request to /borkbot/v1/bork will generate a valid response
+The parameters should be application/x-www-form-urlencoded where TOKEN is the SLACK_VERIFICATION_TOKEN passed in at runtime. If no token is passed in then the api will serve all requests
 
 ## Production
 

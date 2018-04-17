@@ -21,4 +21,4 @@ ADD . borkbot
 
 EXPOSE 8080
 
-CMD ["go", "run", "src/cmd/borkd/main.go"]
+CMD ["go", "run", "borkbot/cmd/borkd/main.go"]
