@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: borkbot-https
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+    - hosts:
+      - api.slack.cphillips.io
+      secretName: api-slack-cphillips-io-tls-prod
+  rules:
+  - host: api.slack.cphillips.io
+    http:
+      paths:
+      - backend:
+          serviceName: borkd-service-prod
+          servicePort: 80
+        path: /borkbot/v1

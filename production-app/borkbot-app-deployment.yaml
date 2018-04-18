@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: borkbotd
-        image: gcr.io/default-project-200117/borkd:v6
+        image: gcr.io/default-project-200117/borkd:v1
         readinessProbe:
           httpGet:
             path: /borkbot/v1/health

@@ -1,0 +1,16 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: api-slack-cphillips-io-prod
+  namespace: default
+spec:
+  secretName: api-slack-cphillips-io-tls-prod
+  issuerRef:
+    name: letsencrypt-production
+  commonName: api.slack.cphillips.io
+  acme:
+    config:
+    - dns01:
+        provider: prod-dns
+      domains:
+        - api.slack.cphillips.io
