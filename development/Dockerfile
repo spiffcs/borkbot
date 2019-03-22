@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine3.7
+FROM golang:1.12-alpine3.9
 
 RUN apk add --no-cache curl git
 
@@ -10,12 +10,8 @@ RUN go get github.com/githubnemo/CompileDaemon
 
 WORKDIR /go/src/github.com/sparklycb
 
-ADD Gopkg.lock Gopkg.lock
-ADD Gopkg.toml Gopkg.toml
 ADD secure/cert.pem /secure/cert.pem
 ADD secure/key.pem /secure/key.pem
-
-RUN dep ensure -vendor-only
 
 ADD . borkbot
 
